@@ -1796,14 +1796,14 @@ class wpdb {
                 case 8127:
                     if ( getenv( 'ProjectNamiLogTranslate' ) ){
 			            $begintransmsg = date("Y-m-d H:i:s") . " Error Code: " . $errors[ 0 ][ 'code' ] . " -- Begin Query translation attempt:" . PHP_EOL .  $query . PHP_EOL;
-                        error_log( $begintransmsg, 3, dirname( ini_get('error_log') ) . '\translate.log' ); 
+                        error_log( $begintransmsg, 3, dirname( ini_get('error_log') ) . DIRECTORY_SEPARATOR . 'translate.log' ); 
                      }
 			        $sqltranslate = new SQL_Translations( DB_USER, DB_PASSWORD, DB_NAME, DB_HOST );
 
                     $query = $sqltranslate->translate( $query );
                     if ( getenv( 'ProjectNamiLogTranslate' ) ){
 			            $endtransmsg = date("Y-m-d H:i:s") . " -- Translation result:" . PHP_EOL .  $query . PHP_EOL . PHP_EOL;
-                        error_log( $endtransmsg, 3, dirname( ini_get('error_log') ) . '\translate.log' ); 
+                        error_log( $endtransmsg, 3, dirname( ini_get('error_log') ) . DIRECTORY_SEPARATOR . 'translate.log' ); 
                     }
     		        $this->last_query = $query;
 
@@ -1814,7 +1814,7 @@ class wpdb {
 					break;
 				default:
 					$begintransmsg = date("Y-m-d H:i:s") .  " Error Code: " . $errors[ 0 ][ 'code' ] . " -- Query NOT translated due to non-defined error code." . PHP_EOL .  $query . PHP_EOL;
-					error_log( $begintransmsg, 3, dirname( ini_get('error_log') ) . '\translate.log' );				
+					error_log( $begintransmsg, 3, dirname( ini_get('error_log') ) . DIRECTORY_SEPARATOR . 'translate.log' );				
             }
 		}
 		
@@ -2388,14 +2388,14 @@ class wpdb {
                     case 8127:
 						if ( getenv( 'ProjectNamiLogTranslate' ) ) {
 							$begintransmsg = date("Y-m-d H:i:s") .  " Error Code: " . $errors[ 0 ][ 'code' ] . " -- Begin get_var translation attempt:" . PHP_EOL .  $query . PHP_EOL;
-                            error_log( $begintransmsg, 3, dirname( ini_get('error_log') ) . '\translate.log' ); 
+                            error_log( $begintransmsg, 3, dirname( ini_get('error_log') ) . DIRECTORY_SEPARATOR . 'translate.log' ); 
 						}
 						$sqltranslate = new SQL_Translations( DB_USER, DB_PASSWORD, DB_NAME, DB_HOST );
 	
 						$query = $sqltranslate->translate( $query );
 						if ( getenv( 'ProjectNamiLogTranslate' ) ) {
 							$endtransmsg = date("Y-m-d H:i:s") . " -- Translation result:" . PHP_EOL .  $query . PHP_EOL . PHP_EOL;
-                            error_log( $endtransmsg, 3, dirname( ini_get('error_log') ) . '\translate.log' ); 
+                            error_log( $endtransmsg, 3, dirname( ini_get('error_log') ) . DIRECTORY_SEPARATOR . 'translate.log' ); 
 						}
 
    	                    $this->_do_query( $query );
@@ -2403,7 +2403,7 @@ class wpdb {
 						break;
 					default:
 						$begintransmsg = date("Y-m-d H:i:s") .  " Error Code: " . $errors[ 0 ][ 'code' ] . " -- Query NOT translated due to non-defined error code." . PHP_EOL .  $query . PHP_EOL;
-						error_log( $begintransmsg, 3, dirname( ini_get('error_log') ) . '\translate.log' );
+						error_log( $begintransmsg, 3, dirname( ini_get('error_log') ) . DIRECTORY_SEPARATOR . 'translate.log' );
 				}
 		    }
 
@@ -2499,8 +2499,10 @@ class wpdb {
 
 		$new_array = array();
 		// Extract the column values
-		for ( $i = 0, $j = count( $this->last_result ); $i < $j; $i++ ) {
-			$new_array[$i] = $this->get_var( null, $x, $i );
+		if ( $this->last_result ) {
+			for ( $i = 0, $j = count( $this->last_result ); $i < $j; $i++ ) {
+				$new_array[ $i ] = $this->get_var( null, $x, $i );
+			}
 		}
 		return $new_array;
 	}
@@ -2544,11 +2546,14 @@ class wpdb {
 		} elseif ( $output == OBJECT_K ) {
 			// Return an array of row objects with keys from column 1
 			// (Duplicates are discarded)
-			foreach ( $this->last_result as $row ) {
-				$var_by_ref = get_object_vars( $row );
-				$key = array_shift( $var_by_ref );
-				if ( ! isset( $new_array[ $key ] ) )
-					$new_array[ $key ] = $row;
+			if ( $this->last_result ) {
+				foreach ( $this->last_result as $row ) {
+					$var_by_ref = get_object_vars( $row );
+					$key = array_shift( $var_by_ref );
+					if ( ! isset( $new_array[ $key ] ) ) {
+						$new_array[ $key ] = $row;
+					}
+				}
 			}
 			return $new_array;
 		} elseif ( $output == ARRAY_A || $output == ARRAY_N ) {
