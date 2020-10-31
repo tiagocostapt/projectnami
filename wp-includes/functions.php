@@ -1765,7 +1765,11 @@ function is_blog_installed() {
 			continue;
 		}
 
-		if ( ! $wpdb->get_results( "exec sp_columns '$table'" ) ) {
+		$described_table = $wpdb->get_results( "exec sp_columns '$table'" );
+		if (
+			( ! $described_table && empty( $wpdb->last_error ) ) ||
+			( is_array( $described_table ) && 0 === count( $described_table ) )
+		) {
 			continue;
 		}
 
