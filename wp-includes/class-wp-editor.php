@@ -8,6 +8,7 @@
  * Private, not included by default. See wp_editor() in wp-includes/general-template.php.
  */
 
+#[AllowDynamicProperties]
 final class _WP_Editors {
 	public static $mce_locale;
 
@@ -1694,7 +1695,7 @@ final class _WP_Editors {
 						}
 					}
 				}
-			}
+			};
 
 			if ( typeof tinymce !== 'undefined' ) {
 				if ( tinymce.Env.ie && tinymce.Env.ie < 11 ) {
